@@ -1,0 +1,7 @@
+fastapi==0.121.0
+uvicorn-worker
+python-multipart
+openai-whisper
+setuptools-rust
+httpx
+pydantic_settings
