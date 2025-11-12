@@ -19,5 +19,6 @@ logging_config.dictConfig(LOGGING)
 
 class Settings(BaseSettings):
     async_api: str
+    elastic_uri: str
 
 settings = Settings()
