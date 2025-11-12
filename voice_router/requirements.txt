@@ -5,3 +5,6 @@ openai-whisper
 setuptools-rust
 httpx
 pydantic_settings
+elasticsearch[async]==8.13.2
+transformers==4.57.1
+openai==2.7.2
