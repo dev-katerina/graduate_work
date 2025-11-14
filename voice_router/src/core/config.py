@@ -20,5 +20,8 @@ logging_config.dictConfig(LOGGING)
 class Settings(BaseSettings):
     async_api: str
     elastic_uri: str
+    upload_dir: str
+    groq_api_key: str
+
 
 settings = Settings()

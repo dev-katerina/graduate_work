@@ -1,8 +1,9 @@
 import httpx
 from core.config import settings
 
+
 async def search_films(query_text: str):
-    url = settings.async_api+"/v1/films/search"
+    url = settings.async_api + "/v1/films/search"
     params = {
         "query": query_text,
         "page_number": 1,
