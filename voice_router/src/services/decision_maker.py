@@ -6,7 +6,7 @@ from typing import List, Dict
 import asyncio
 import json
 from groq import Groq
-from models.user_intention import ApiMatch
+from models.user_intention import ApiMatch, ApiParameter
 from core.config import settings
 
 
@@ -20,8 +20,16 @@ class DecisionMaker:
         """
         Находит наиболее релевантный api_uri на основе пользовательского текста.
         """
+
         query = {
-            "query": {"match": {"description": {"query": text, "fuzziness": "AUTO"}}},
+            "query": {
+                "match": {
+                    "description": {
+                        "query": text,
+                        "fuzziness": "AUTO"
+                    }
+                }
+            },
             "_source": [
                 "api_uri",
                 "description",
@@ -34,26 +42,34 @@ class DecisionMaker:
         result = await self.elastic.search(index="api_index", body=query)
         hits = result["hits"]["hits"]
 
-        # Берём первый (наиболее релевантный)
+        if not hits:
+            raise ValueError("Нет подходящего маршрута для данного текста")
+
         hit = hits[0]
         source = hit["_source"]
 
-        result = {
-            "api_uri": source["api_uri"],
-            "score": hit["_score"],
-            "voice_form": source.get("voice_form"),
-            "text_form": source.get("text_form"),
-            "parameters": source.get("parameters"),
-        }
-        return ApiMatch(**result)
+        # Корректное создание ApiMatch: параметры -> список ApiParameter
+        parameters_raw = source.get("parameters", [])
+        parameters = [ApiParameter(**p) for p in parameters_raw]
+
+        return ApiMatch(
+            api_uri=source["api_uri"],
+            score=hit["_score"],
+            voice_form=source.get("voice_form"),
+            text_form=source.get("text_form"),
+            parameters=parameters,
+        )
 
 
-    async def get_parameters(self, api_uri: ApiMatch, text: str, parameters: List[str]) -> Dict[str, str]:
+
+    async def get_parameters(self, api_uri: ApiMatch, text: str) -> Dict[str, str]:
+        # Извлекаем только имена параметров
+        param_names = [p.parameter_name for p in api_uri.parameters]
         prompt = f"""
         Извлеки и заполни параметры из текста.
 
         Текст: "{text}"
-        Параметры: {api_uri.parameters}
+        Параметры: {param_names}
 
         Верни результат в формате JSON.
 

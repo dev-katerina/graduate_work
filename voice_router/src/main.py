@@ -46,12 +46,8 @@ async def upload_audio(
         }
 
     # === 4. Извлечение параметров из текста ===
-    parameters = uri_info.parameters
 
-    # === 4.1 Запуск модели для заполнения параметров ===
-    extracted_params = {}
-    if parameters:
-        extracted_params = await dm.get_parameters(text, parameters)
+    extracted_params = await dm.get_parameters(uri_info, text)
 
     # === 5. Возврат результата для проверки ===
     return {
@@ -59,6 +55,6 @@ async def upload_audio(
         "api_uri": uri_info.api_uri,
         "voice_form": uri_info.voice_form,
         "text_form": uri_info.text_form,
-        "parameters": parameters,
+        "parameters": uri_info.parameters,
         "extracted_parameters": extracted_params,
     }
