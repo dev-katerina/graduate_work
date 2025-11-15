@@ -60,16 +60,25 @@ class DecisionMaker:
             parameters=parameters,
         )
 
-
+    def format_parameters_for_prompt(self, params: list[ApiParameter]) -> list[dict]:
+        result = []
+        for p in params:
+            result.append({
+                "name": p.parameter_name,
+                "default_value": p.default_value,
+                "allowed_values": p.allowed_values
+            })
+        return result
 
     async def get_parameters(self, api_uri: ApiMatch, text: str) -> Dict[str, str]:
         # Извлекаем только имена параметров
-        param_names = [p.parameter_name for p in api_uri.parameters]
+        formatted_params = self.format_parameters_for_prompt(api_uri.parameters)
         prompt = f"""
         Извлеки и заполни параметры из текста.
 
         Текст: "{text}"
-        Параметры: {param_names}
+        Параметры (с ограничениями и значениями по умолчанию):
+        {formatted_params}
 
         Верни результат в формате JSON.
 
@@ -82,9 +91,12 @@ class DecisionMaker:
             "page_size": ""
         }}
 
-        Начинай ответ с открывающей фигурной скобки {{
+        Правила:
+        - Для каждого параметра, если значение не найдено в тексте, подставь default_value.
+        - Если default_value пустой, подставь пустую строку.
+        - Если allowed_values не пуст, выбирай значение только из них.
+        - Верни ответ строго в формате JSON, начиная с фигурной скобки {{
         """
-
         # Вызов Groq API через их SDK, обернут в asyncio.to_thread,
         # так как SDK, скорее всего, синхронный
         def sync_call():
