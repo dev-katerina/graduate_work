@@ -25,5 +25,5 @@ jobs:
       - name: Build and push
         run: |
           IMAGE_NAME=ghcr.io/dev-katerina/graduate_work:latest
-          docker build ./voice_router -f ./Dockerfile -t $IMAGE_NAME
+          docker build ./voice_router -f ./voice_router/Dockerfile -t $IMAGE_NAME
           docker push $IMAGE_NAME
