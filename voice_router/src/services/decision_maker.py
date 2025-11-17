@@ -5,7 +5,6 @@ from connections.elastic import get_elastic
 from typing import List, Dict
 import asyncio
 import json
-from groq import Groq
 from models.user_intention import ApiMatch, ApiParameter
 from core.config import settings
 from openai import OpenAI
