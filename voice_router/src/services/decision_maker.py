@@ -8,13 +8,16 @@ import json
 from groq import Groq
 from models.user_intention import ApiMatch, ApiParameter
 from core.config import settings
+from openai import OpenAI
 
 
 class DecisionMaker:
     def __init__(self, elastic: AsyncElasticsearch):
         self.elastic = elastic
-        api_key = settings.groq_api_key
-        self.client = Groq(api_key=api_key)
+        self.client = OpenAI(
+            base_url="https://router.huggingface.co/v1",
+            api_key=settings.openai_api_key,
+        )
 
     async def choose_uri(self, text: str) -> ApiMatch:
         """
@@ -102,7 +105,7 @@ class DecisionMaker:
         def sync_call():
             chat_completion = self.client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",  # или нужная тебе модель
+                model="openai/gpt-oss-20b:groq",  # или нужная тебе модель
             )
             return chat_completion.choices[0].message.content
 

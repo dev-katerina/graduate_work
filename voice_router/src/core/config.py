@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     elastic_uri: str
     upload_dir: str
     groq_api_key: str
+    openai_api_key: str
 
 
 settings = Settings()
