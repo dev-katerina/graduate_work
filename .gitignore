@@ -3,3 +3,4 @@
 *.log
 *.env
 uploads
+init_db
