@@ -24,5 +24,9 @@ class Settings(BaseSettings):
     groq_api_key: str
     openai_api_key: str
 
+        # Создание токенов
+    secret_key: str
+    algorithm: str
+
 
 settings = Settings()

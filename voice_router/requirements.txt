@@ -7,3 +7,4 @@ httpx
 pydantic_settings
 elasticsearch[async]==8.13.2
 openai
+python-jose
