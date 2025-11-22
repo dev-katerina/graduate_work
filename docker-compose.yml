@@ -4,12 +4,22 @@ services:
       context: ./voice_router
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "8003:8000"
     volumes:
       - ./voice_router/src:/app
     env_file:
       - ./voice_router/.env
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./configs:/etc/nginx/conf.d:ro
+      - static_volume:/opt/app/static
+
+    depends_on:
+      - service
+    ports:
+      - "80:80"
       
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.16
@@ -17,8 +27,6 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - path.repo=/usr/share/elasticsearch/snapshots
-    ports:
-      - "9200:9200"
     volumes:
       - esdata:/usr/share/elasticsearch/data
       - ./es_snapshots:/usr/share/elasticsearch/snapshots
@@ -61,3 +69,4 @@ volumes:
   esdata:
   redisdata:
   pgdata:
+  static_volume:
