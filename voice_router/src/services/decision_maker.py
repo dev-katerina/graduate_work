@@ -1,13 +1,14 @@
 from elasticsearch import AsyncElasticsearch
 from functools import lru_cache
 from fastapi import Depends
-from connections.elastic import get_elastic
+from connections.elastic import get_elastic, RETRIABLE_EXCEPTIONS 
 from typing import List, Dict
 import asyncio
 import json
 from models.user_intention import ApiMatch, ApiParameter
 from core.config import settings
 from openai import OpenAI
+import backoff
 
 
 class DecisionMaker:
@@ -18,6 +19,16 @@ class DecisionMaker:
             api_key=settings.openai_api_key,
         )
 
+    @backoff.on_exception(
+            backoff.expo,
+            RETRIABLE_EXCEPTIONS,
+            max_tries=5,
+            jitter=backoff.full_jitter,
+            on_backoff=lambda details: print(
+                f"Backing off {details['wait']:0.1f}s after {details['tries']} tries "
+                f"calling choose_uri"
+            )
+        )
     async def choose_uri(self, text: str) -> ApiMatch:
         """
         Находит наиболее релевантный api_uri на основе пользовательского текста.

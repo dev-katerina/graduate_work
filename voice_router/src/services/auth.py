@@ -3,6 +3,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt
 from typing import Optional
 from core.config import settings
+from http import HTTPStatus
+
 
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
@@ -16,7 +18,7 @@ class JWTBearer(HTTPBearer):
                 payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
                 return payload  # Можно передать как user
             except jwt.ExpiredSignatureError:
-                raise HTTPException(status_code=401, detail="Token expired")
+                raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Token expired")
             except jwt.JWTError:
-                raise HTTPException(status_code=401, detail="Invalid token")
-        raise HTTPException(status_code=403, detail="Authorization required")
+                raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Authorization required")

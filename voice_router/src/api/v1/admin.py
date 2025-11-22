@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from elasticsearch import AsyncElasticsearch
-from connections.elastic import get_elastic
+from connections.elastic import get_elastic, RETRIABLE_EXCEPTIONS
 from http import HTTPStatus
 from services.auth import JWTBearer
-
+import backoff
 from api.v1.schemas import ApiMatch, ReadAPIMatch
 
 router = APIRouter()
@@ -12,6 +12,16 @@ INDEX_NAME = "api_index"
 
 
 @router.post("/", response_model=ReadAPIMatch)
+@backoff.on_exception(
+    backoff.expo,
+    RETRIABLE_EXCEPTIONS,
+    max_tries=5,
+    jitter=backoff.full_jitter,
+    on_backoff=lambda details: print(
+        f"Backing off {details['wait']:0.1f}s after {details['tries']} tries "
+        f"calling {details['target'].__name__}"
+    )
+)
 async def create_item(item: ApiMatch, es: AsyncElasticsearch = Depends(get_elastic), 
     user: dict = Depends(JWTBearer())):
     """
@@ -22,6 +32,16 @@ async def create_item(item: ApiMatch, es: AsyncElasticsearch = Depends(get_elast
 
 
 @router.get("/", response_model=list[ReadAPIMatch])
+@backoff.on_exception(
+    backoff.expo,
+    RETRIABLE_EXCEPTIONS,
+    max_tries=5,
+    jitter=backoff.full_jitter,
+    on_backoff=lambda details: print(
+        f"Backing off {details['wait']:0.1f}s after {details['tries']} tries "
+        f"calling {details['target'].__name__}"
+    )
+)
 async def get_all(es: AsyncElasticsearch = Depends(get_elastic), 
     user: dict = Depends(JWTBearer())):
     """
@@ -40,6 +60,16 @@ async def get_all(es: AsyncElasticsearch = Depends(get_elastic),
 
 
 @router.get("/{id}", response_model=ReadAPIMatch)
+@backoff.on_exception(
+    backoff.expo,
+    RETRIABLE_EXCEPTIONS,
+    max_tries=5,
+    jitter=backoff.full_jitter,
+    on_backoff=lambda details: print(
+        f"Backing off {details['wait']:0.1f}s after {details['tries']} tries "
+        f"calling {details['target'].__name__}"
+    )
+)
 async def get_item(id: str, es: AsyncElasticsearch = Depends(get_elastic), 
     user: dict = Depends(JWTBearer())):
     """
@@ -54,6 +84,16 @@ async def get_item(id: str, es: AsyncElasticsearch = Depends(get_elastic),
 
 
 @router.put("/{id}", response_model=ReadAPIMatch)
+@backoff.on_exception(
+    backoff.expo,
+    RETRIABLE_EXCEPTIONS,
+    max_tries=5,
+    jitter=backoff.full_jitter,
+    on_backoff=lambda details: print(
+        f"Backing off {details['wait']:0.1f}s after {details['tries']} tries "
+        f"calling {details['target'].__name__}"
+    )
+)
 async def update_item(id: str, item: ApiMatch, es: AsyncElasticsearch = Depends(get_elastic), 
     user: dict = Depends(JWTBearer())):
     """
@@ -69,6 +109,16 @@ async def update_item(id: str, item: ApiMatch, es: AsyncElasticsearch = Depends(
 
 
 @router.delete("/{id}", response_model=dict)
+@backoff.on_exception(
+    backoff.expo,
+    RETRIABLE_EXCEPTIONS,
+    max_tries=5,
+    jitter=backoff.full_jitter,
+    on_backoff=lambda details: print(
+        f"Backing off {details['wait']:0.1f}s after {details['tries']} tries "
+        f"calling {details['target'].__name__}"
+    )
+)
 async def delete_item(id: str, es: AsyncElasticsearch = Depends(get_elastic), 
     user: dict = Depends(JWTBearer())):
     """
